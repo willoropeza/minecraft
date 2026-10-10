@@ -17,6 +17,9 @@
     ]
   },
   "context": {
+    "minecraftVersion": "26.3",
+    "itzgImageTag": "2026.9.2-java25",
+    "imageRevision": "1",
     "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": true,
     "@aws-cdk/aws-apigateway:authorizerChangeDeploymentLogicalId": true,
     "@aws-cdk/aws-apigateway:disableCloudWatchRole": true,
