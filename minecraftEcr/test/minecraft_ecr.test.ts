@@ -1,17 +1,53 @@
-// import * as cdk from 'aws-cdk-lib/core';
-// import { Template } from 'aws-cdk-lib/assertions';
-// import * as MinecraftEcr from '../lib/minecraft_ecr-stack';
+import * as cdk from 'aws-cdk-lib/core';
+import { Template } from 'aws-cdk-lib/assertions';
+import { MinecraftImageRepository, MinecraftImageRepositoryProps } from '../lib/constructs/minecraft-image-repository';
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/minecraft_ecr-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new MinecraftEcr.MinecraftEcrStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
+describe('MinecraftImageRepository', () => {
+    const buildTemplate = (repositoryProps: MinecraftImageRepositoryProps = {}): Template => {
+        const app = new cdk.App();
+        const stack = new cdk.Stack(app, 'TestStack');
+        new MinecraftImageRepository(stack, 'ImageRepository', repositoryProps);
+        return Template.fromStack(stack);
+    };
 
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
+    test('makes every tag immutable except live', () => {
+        buildTemplate().hasResourceProperties('AWS::ECR::Repository', {
+            RepositoryName: 'minecraft-server',
+            ImageTagMutability: 'IMMUTABLE_WITH_EXCLUSION',
+            ImageTagMutabilityExclusionFilters: [
+                { ImageTagMutabilityExclusionFilterType: 'WILDCARD', ImageTagMutabilityExclusionFilterValue: 'live' },
+            ],
+        });
+    });
+
+    test('retains the repository by default', () => {
+        buildTemplate().hasResource('AWS::ECR::Repository', {
+            DeletionPolicy: 'Retain',
+            UpdateReplacePolicy: 'Retain',
+        });
+    });
+
+    test('has an untagged-expiry rule and a keep-10 rule', () => {
+        const repositories = buildTemplate().findResources('AWS::ECR::Repository');
+        const repository = Object.values(repositories)[0];
+        const lifecyclePolicy = JSON.parse(repository.Properties.LifecyclePolicy.LifecyclePolicyText);
+
+        expect(lifecyclePolicy.rules).toHaveLength(2);
+        expect(lifecyclePolicy.rules[0].selection).toMatchObject({ tagStatus: 'untagged', countNumber: 1 });
+        expect(lifecyclePolicy.rules[1].selection).toMatchObject({ tagStatus: 'any', countNumber: 10 });
+    });
+
+    test('respect a custom image count', () => {
+        const repositories = buildTemplate({ maxImageCount: 5 }).findResources('AWS::ECR::Repository');
+        const repository = Object.values(repositories)[0];
+        const lifecyclePolicy = JSON.parse(repository.Properties.LifecyclePolicy.LifecyclePolicyText);
+
+        expect(lifecyclePolicy.rules[1].selection).toMatchObject({ tagStatus: 'any', countNumber: 5 });
+    });
+
+    test('DESTROY also empties the repository on delete', () => {
+        buildTemplate({ removalPolicy: cdk.RemovalPolicy.DESTROY }).hasResourceProperties('AWS::ECR::Repository', {
+            EmptyOnDelete: true,
+        });
+    });
 });
