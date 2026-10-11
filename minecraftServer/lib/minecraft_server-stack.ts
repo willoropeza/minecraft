@@ -47,7 +47,7 @@ export class MinecraftServerStack extends cdk.Stack {
     const buildUpdateServiceCommand = (commandArguments: string): string => cdk.Fn.join('', [
       'aws ecs update-service --cluster ', network.cluster.clusterName,
       ' --service ', server.service.serviceName,
-      `${commandArguments}`,
+      ` ${commandArguments}`,
     ]);
 
     new cdk.CfnOutput(this, 'StartCommand', { value: buildUpdateServiceCommand('--desired-count 1') });

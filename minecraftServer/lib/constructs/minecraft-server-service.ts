@@ -68,7 +68,7 @@ export class MinecraftServerService extends Construct implements ec2.IConnectabl
                 retries: 3,
                 startPeriod: cdk.Duration.seconds(300),
             },
-            logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'mninecraft' }),
+            logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'minecraft' }),
         });
 
         props.storage.mountInto(serverContainer, '/data');
