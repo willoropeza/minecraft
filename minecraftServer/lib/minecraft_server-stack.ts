@@ -1,14 +1,20 @@
 import * as cdk from 'aws-cdk-lib/core';
+import * as ecr from 'aws-cdk-lib/aws-ecr';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { MinecraftNetwork } from './constructs/minecraft-network';
+import { MinecraftServerService } from './constructs/minecraft-server-service';
 import { MinecraftWorldStorage } from './constructs/minecraft-world-storage';
 
+export interface MinecraftServerStackProps extends cdk.StackProps {
+  readonly spot: boolean;
+}
 export class MinecraftServerStack extends cdk.Stack {
   get availabilityZones(): string[] {
     return ['us-east-1a', 'us-east-1b'];
   }
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: MinecraftServerStackProps) {
     super(scope, id, props);
     cdk.Validations.of(this).acknowledge({
       id: 'CloudFormation-Validate::W3010',
@@ -17,8 +23,36 @@ export class MinecraftServerStack extends cdk.Stack {
 
     const network = new MinecraftNetwork(this, 'Network');
 
+    const repositoryName = ssm.StringParameter.valueForStringParameter(this, '/minecraft/ecr/repository-name');
+    const repository = ecr.Repository.fromRepositoryName(this, 'Repository', repositoryName);
+
     const worldStorage = new MinecraftWorldStorage(this, 'WorldStorage', { vpc: network.vpc });
 
+    const server = new MinecraftServerService(this, 'Server', {
+      cluster: network.cluster,
+      repository,
+      storage: worldStorage,
+      spot: props.spot,
+    });
+
+    new ssm.StringParameter(this, 'ClusterNameParam', {
+      parameterName: '/minecraft/server/cluster-name',
+      stringValue: network.cluster.clusterName,
+    });
+    new ssm.StringParameter(this, 'ServiceNameParam', {
+      parameterName: '/minecraft/server/service-name',
+      stringValue: server.service.serviceName,
+    });
+
+    const buildUpdateServiceCommand = (commandArguments: string): string => cdk.Fn.join('', [
+      'aws ecs update-service --cluster ', network.cluster.clusterName,
+      ' --service ', server.service.serviceName,
+      `${commandArguments}`,
+    ]);
+
+    new cdk.CfnOutput(this, 'StartCommand', { value: buildUpdateServiceCommand('--desired-count 1') });
+    new cdk.CfnOutput(this, 'StopCommand', { value: buildUpdateServiceCommand('--desired-count 0') });
+    new cdk.CfnOutput(this, 'RestartCommand', { value: buildUpdateServiceCommand('--force-new-deployment') });
     new cdk.CfnOutput(this, 'VpcId', { value: network.vpc.vpcId });
     new cdk.CfnOutput(this, 'FileSystemId', { value: worldStorage.fileSystem.fileSystemId });
   }
