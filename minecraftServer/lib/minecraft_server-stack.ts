@@ -1,16 +1,21 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { MinecraftNetwork } from './constructs/minecraft-network';
 
 export class MinecraftServerStack extends cdk.Stack {
+  get availabilityZones(): string[] {
+    return ['us-east-1a', 'us-east-1b'];
+  }
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+    cdk.Validations.of(this).acknowledge({
+      id: 'CloudFormation-Validate::W3010',
+      reason: 'AZs are pinned on purpose so synth works offline',
+    });
 
-    // The code that defines your stack goes here
+    const network = new MinecraftNetwork(this, 'Network');
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'MinecraftServerQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    new cdk.CfnOutput(this, 'VpcId', { value: network.vpc.vpcId });
   }
 }
