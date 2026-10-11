@@ -1,8 +1,6 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { Template } from 'aws-cdk-lib/assertions';
 import { MinecraftNetwork } from '../lib/constructs/minecraft-network';
-import { CapacityProvider } from 'aws-cdk-lib/aws-lambda';
-import { ClusterSettings } from 'aws-cdk-lib/aws-ecs/mixins';
 
 describe('MinecraftNetwork', () => {
     const app = new cdk.App();
