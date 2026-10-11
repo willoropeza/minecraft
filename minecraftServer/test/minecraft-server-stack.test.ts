@@ -17,4 +17,9 @@ describe('MinecraftServerStack', () => {
     test('outputs the VPC id', () => {
         template.hasOutput('VpcId', {});
     });
+
+    test('has exactly one retained file system', () => {
+        template.resourceCountIs('AWS::EFS::FileSystem', 1);
+        template.hasResource('AWS::EFS::FileSystem', { DeletionPolicy: 'Retain' });
+    });
 });
