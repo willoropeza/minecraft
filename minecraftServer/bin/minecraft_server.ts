@@ -15,6 +15,9 @@ const requireContext = (contextKey: string): string => {
 new MinecraftServerStack(app, 'MinecraftServerStack', {
   env: { account: '363234579155', region: 'us-east-1' },
   terminationProtection: true,
+  hostedZoneId: requireContext('hostedZoneId'),
+  zoneName: requireContext('zoneName'),
+  recordName: requireContext('recordName'),
   spot: requireContext('spot') === 'true',
 });
 

@@ -7,6 +7,9 @@ describe('MinecraftServerStack', () => {
     const app = new cdk.App();
     const stack = new MinecraftServerStack(app, 'TestServerStack', {
         env: { account: '363234579155', region: 'us-east-1' },
+        hostedZoneId: 'Z0231589F4WWDQQ1N9V',
+        zoneName: 'dev.thirdechelon.io',
+        recordName: 'mc.dev.thirdechelon.io',
         spot: true,
     });
     const template = Template.fromStack(stack);
@@ -41,6 +44,14 @@ describe('MinecraftServerStack', () => {
     test('writes the cluster and service name to SSM', () => {
         template.hasResourceProperties('AWS::SSM::Parameter', { Name: '/minecraft/server/cluster-name' });
         template.hasResourceProperties('AWS::SSM::Parameter', { Name: '/minecraft/server/service-name' });
+    });
+
+    test('has the DNS updater rule', () => {
+        template.resourceCountIs('AWS::Events::Rule', 1);
+    });
+
+    test('outputs the server address', () => {
+        template.hasOutput('ServerAddress', { Value: 'mc.dev.thirdechelon.io' });
     });
 
     test('outputs the start command', () => {

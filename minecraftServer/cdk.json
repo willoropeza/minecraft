@@ -17,6 +17,9 @@
     ]
   },
   "context": {
+    "hostedZoneId": "Z0231589F4WWDQQ1N9V",
+    "zoneName": "dev.thirdechelon.io",
+    "recordName": "mc.dev.thirdechelon.io",
     "spot": true,
     "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": true,
     "@aws-cdk/aws-apigateway:authorizerChangeDeploymentLogicalId": true,
