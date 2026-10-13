@@ -11,6 +11,25 @@ CDK app that owns the Minecraft server's container image. It creates the ECR rep
 The repository name is published to SSM at `/minecraft/ecr/repository-name`, which
 `minecraftServer` reads at deploy time. **Deploy this app before `minecraftServer`.**
 
+## How it works
+
+```mermaid
+flowchart LR
+  context[cdk.json<br/>minecraftVersion, itzgImageTag,<br/>imageRevision] -->|build args| build
+  dockerfile[docker/Dockerfile<br/>itzg/minecraft-server] --> build[DockerImageAsset<br/>linux/arm64]
+  build -->|cdk deploy pushes| staging[(CDK assets<br/>repository)]
+  staging -->|cdk-ecr-deployment copies| versionTag[minecraft-server:<br/>26.3-r2]
+  staging -->|cdk-ecr-deployment copies| liveTag[minecraft-server:<br/>live]
+  repo[ECR repository<br/>minecraft-server] -->|name| ssm[SSM<br/>/minecraft/ecr/repository-name]
+  liveTag -->|pulled on each start| task[minecraftServer<br/>Fargate task]
+  ssm -->|read at deploy time| task
+```
+
+1. `cdk deploy` builds the image from `docker/Dockerfile` for `linux/arm64`. The `cdk.json` values are passed in as build args.
+2. The CDK pushes the built image to its own bootstrap assets repository.
+3. `cdk-ecr-deployment` copies the image into `minecraft-server` twice: once as the version tag, once as `live`.
+4. The repository name goes to SSM, where `minecraftServer` reads it. Each new server task pulls `live`, so a restart picks up the new image.
+
 ## Layout
 
 ```
