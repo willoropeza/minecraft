@@ -54,8 +54,8 @@ describe('MinecraftServerStack', () => {
     })
   })
 
-  test('has the DNS updater rule', () => {
-    template.resourceCountIs('AWS::Events::Rule', 1)
+  test('has the DNS updater and auto-stopper rules', () => {
+    template.resourceCountIs('AWS::Events::Rule', 2)
   })
 
   test('outputs the server address', () => {

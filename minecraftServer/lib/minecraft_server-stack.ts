@@ -6,7 +6,9 @@ import { Construct } from 'constructs'
 import { MinecraftNetwork } from './constructs/minecraft-network'
 import { MinecraftServerService } from './constructs/minecraft-server-service'
 import { MinecraftWorldStorage } from './constructs/minecraft-world-storage'
+import { ServiceAutoStopper } from './constructs/service-auto-stopper'
 import { TaskPublicDnsUpdater } from './constructs/task-public-dns-updater'
+import { Service } from 'aws-cdk-lib/aws-servicediscovery'
 
 export interface MinecraftServerStackProps extends cdk.StackProps {
   readonly hostedZoneId: string
@@ -55,6 +57,8 @@ export class MinecraftServerStack extends cdk.Stack {
       hostedZone,
       recordName: props.recordName,
     })
+
+    new ServiceAutoStopper(this, 'AutoStopper', { service: server.service })
 
     new ssm.StringParameter(this, 'ClusterNameParam', {
       parameterName: '/minecraft/server/cluster-name',
