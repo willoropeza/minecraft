@@ -15,7 +15,6 @@
     ]
   },
   "context": {
-    "hostedZoneId": "Z0231589F4WWDQQ1N9V",
     "zoneName": "dev.thirdechelon.io",
     "recordName": "mc.dev.thirdechelon.io",
     "spot": true,

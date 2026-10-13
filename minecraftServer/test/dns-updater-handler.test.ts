@@ -16,12 +16,12 @@ const buildEvent = (networkInterfaceId?: string): TaskStateChangeEvent => ({
   id: 'test-event',
   'detail-type': 'ECS Task State Change',
   source: 'aws.ecs',
-  account: '363234579155',
+  account: '123456789012',
   time: '2026-10-08T00:00:00Z',
   region: 'us-east-1',
   resources: [],
   detail: {
-    taskArn: 'arn:aws:ecs:us-east-1:363234579155:task/minecraft/abc123',
+    taskArn: 'arn:aws:ecs:us-east-1:123456789012:task/minecraft/abc123',
     attachments: networkInterfaceId
       ? [
           {
@@ -37,7 +37,7 @@ describe('dnsUpdater handler', () => {
   beforeEach(() => {
     ec2Mock.reset()
     route53Mock.reset()
-    process.env.HOSTED_ZONE_ID = 'Z0231589F4WWDQQ1N9V'
+    process.env.HOSTED_ZONE_ID = 'Z0123456789EXAMPLE'
     process.env.RECORD_NAME = 'mc.dev.thirdechelon.io'
     process.env.RECORD_TTL = '30'
   })

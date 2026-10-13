@@ -6,8 +6,7 @@ import { Capacity } from 'aws-cdk-lib/aws-dynamodb'
 describe('MinecraftServerStack', () => {
   const app = new cdk.App()
   const stack = new MinecraftServerStack(app, 'TestServerStack', {
-    env: { account: '363234579155', region: 'us-east-1' },
-    hostedZoneId: 'Z0231589F4WWDQQ1N9V',
+    env: { account: '123456789012', region: 'us-east-1' },
     zoneName: 'dev.thirdechelon.io',
     recordName: 'mc.dev.thirdechelon.io',
     spot: true,
@@ -36,6 +35,13 @@ describe('MinecraftServerStack', () => {
     template.hasParameter('*', {
       Type: 'AWS::SSM::Parameter::Value<String>',
       Default: '/minecraft/ecr/repository-name',
+    })
+  })
+
+  test('reads the hosted zone id from SSM', () => {
+    template.hasParameter('*', {
+      Type: 'AWS::SSM::Parameter::Value<String>',
+      Default: '/minecraft/dns/hosted-zone-id',
     })
   })
 

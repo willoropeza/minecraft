@@ -23,7 +23,7 @@ describe('TaskPublicDnsUpdater', () => {
     storage: worldStorage,
   })
   const hostedZone = route53.HostedZone.fromHostedZoneAttributes(stack, 'HostedZone', {
-    hostedZoneId: 'Z0231589F4WWDQQ1N9V',
+    hostedZoneId: 'Z0123456789EXAMPLE',
     zoneName: 'dev.thirdechelon.io',
   })
 
@@ -40,7 +40,7 @@ describe('TaskPublicDnsUpdater', () => {
       Architectures: ['arm64'],
       Environment: {
         Variables: {
-          HOSTED_ZONE_ID: 'Z0231589F4WWDQQ1N9V',
+          HOSTED_ZONE_ID: 'Z0123456789EXAMPLE',
           RECORD_NAME: 'mc.dev.thirdechelon.io',
           RECORD_TTL: '30',
         },

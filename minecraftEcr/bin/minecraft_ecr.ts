@@ -13,7 +13,7 @@ const requireContext = (contextKey: string): string => {
 }
 
 new MinecraftEcrStack(app, 'MinecraftEcrStack', {
-  env: { account: '363234579155', region: 'us-east-1' },
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
   terminationProtection: true,
   minecraftVersion: requireContext('minecraftVersion'),
   itzgImageTag: requireContext('itzgImageTag'),

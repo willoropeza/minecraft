@@ -11,7 +11,6 @@ import { TaskPublicDnsUpdater } from './constructs/task-public-dns-updater'
 import { Service } from 'aws-cdk-lib/aws-servicediscovery'
 
 export interface MinecraftServerStackProps extends cdk.StackProps {
-  readonly hostedZoneId: string
   readonly zoneName: string
   readonly recordName: string
   readonly spot: boolean
@@ -37,7 +36,10 @@ export class MinecraftServerStack extends cdk.Stack {
     const repository = ecr.Repository.fromRepositoryName(this, 'Repository', repositoryName)
 
     const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
-      hostedZoneId: props.hostedZoneId,
+      hostedZoneId: ssm.StringParameter.valueForStringParameter(
+        this,
+        '/minecraft/dns/hosted-zone-id',
+      ),
       zoneName: props.zoneName,
     })
 

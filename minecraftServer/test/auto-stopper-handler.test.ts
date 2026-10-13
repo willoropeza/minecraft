@@ -7,7 +7,7 @@ import {
 } from '../lambda/autoStopper/index'
 
 const SELF_EXIT_DETAIL: TaskStoppedDetail = {
-  taskArn: 'arn:aws:ecs:us-east-1:363234579155:task/minecraft/abc123',
+  taskArn: 'arn:aws:ecs:us-east-1:123456789012:task/minecraft/abc123',
   stopCode: 'EssentialContainerExited',
   stoppedReason: 'Essential container in task exited',
   containers: [{ exitCode: 0 }],
@@ -91,7 +91,7 @@ function buildStoppedEvent(detailOverrides: Partial<TaskStoppedDetail> = {}): Ta
     id: 'test-event',
     'detail-type': 'ECS Task State Change',
     source: 'aws.ecs',
-    account: '363234579155',
+    account: '123456789012',
     time: '2026-10-08T00:00:00Z',
     region: 'us-east-1',
     resources: [],
